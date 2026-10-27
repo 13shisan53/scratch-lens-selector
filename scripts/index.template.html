@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>划痕检测选型助手 · 海康机器人实型号版</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#141b23; --panel2:#1a232d; --line:#25313d;
+    --ink:#e6edf3; --muted:#8b98a5; --accent:#3fb6a8; --accent2:#f0b429;
+    --warn:#e5534b; --ok:#4fb477;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.6 "Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  a{color:var(--accent)}
+  header{padding:28px 24px 18px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#101821,#0d1117)}
+  h1{margin:0 0 6px;font-size:24px;letter-spacing:.4px}
+  .sub{margin:0;color:var(--muted);max-width:900px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .badge{font-size:12px;padding:3px 9px;border:1px solid var(--line);
+    border-radius:999px;color:var(--muted);background:#111a22}
+  .badge b{color:var(--accent);font-weight:600}
+  main{max-width:1280px;margin:0 auto;padding:20px 16px 8px;
+    display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start}
+  @media(max-width:980px){main{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+  .panel h2{margin:0 0 12px;font-size:15px;letter-spacing:.5px;color:#fff}
+  .panel h2 span{color:var(--accent);font-weight:400;font-size:12px;margin-left:8px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  input,select{width:100%;background:#0f161d;border:1px solid var(--line);
+    color:var(--ink);border-radius:6px;padding:7px 9px;font-size:13px}
+  input:focus,select:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+  .row{margin-bottom:10px}
+  .hint{font-size:11px;color:#6b7783;margin-top:3px}
+  button{width:100%;margin-top:6px;padding:10px;border:0;border-radius:8px;
+    background:var(--accent);color:#06231f;font-weight:700;font-size:14px;cursor:pointer}
+  button:hover{filter:brightness(1.08)}
+  .cards{display:grid;gap:12px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+  .card.pick{border-color:#2f6b63;background:#152220}
+  .card h3{margin:0 0 4px;font-size:14px}
+  .card h3 .tag{font-size:11px;padding:1px 7px;border-radius:999px;margin-left:6px;
+    background:#233240;color:var(--muted);font-weight:500}
+  .model{font-family:Consolas,monospace;color:var(--accent2);font-size:14px}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:4px 14px;margin-top:6px}
+  .kv div{font-size:12px;color:var(--muted)}
+  .kv b{color:var(--ink);font-weight:500}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  th{color:var(--muted);font-weight:500;position:sticky;top:0;background:#111a22;z-index:1}
+  tbody tr:hover{background:#18222c}
+  .scroll{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+  .mono{font-family:Consolas,monospace}
+  .ok{color:var(--ok)} .bad{color:var(--warn)} .warn{color:var(--accent2)}
+  .calc{background:#101a22;border:1px dashed #2b3a47;border-radius:8px;padding:10px 12px;
+    font-size:12px;color:var(--muted);line-height:1.9}
+  .calc b{color:var(--ink)}
+  .empty{color:var(--muted);padding:24px;text-align:center}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .tab{padding:6px 12px;border:1px solid var(--line);border-radius:7px;cursor:pointer;
+    font-size:12px;color:var(--muted);background:#111a22}
+  .tab.on{background:var(--accent);color:#06231f;border-color:var(--accent);font-weight:600}
+  .wide{max-width:1280px;margin:0 auto 16px;padding:0 16px}
+  .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .fig{background:#0f161d;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+  .fig img{max-width:100%;height:130px;object-fit:contain;background:#0a1016;border-radius:6px}
+  .fig p{margin:8px 0 0;font-size:11px;color:var(--muted)}
+  .fig svg{width:100%;height:150px}
+  footer{max-width:1280px;margin:0 auto;padding:8px 16px 40px;color:#5f6b76;font-size:12px}
+  .src{font-size:11px;color:#5f6b76}
+  ul.tight{margin:6px 0 0 18px;padding:0;color:var(--muted);font-size:12px}
+  ul.tight li{margin:2px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>划痕检测选型助手 <span style="color:#8b98a5;font-size:14px;font-weight:400">· 海康机器人真实产品型号</span></h1>
+  <p class="sub">输入检测条件，自动给出<b>相机 + 镜头（含远心）+ 光源</b>的具体型号与校核数据。所有型号、分辨率、像元、靶面、帧率、接口、焦距、倍率、功率均来自海康机器人官网产品页，可在下方数据表中直接核对。</p>
+  <div class="badges">
+    <span class="badge">数据来源 <b>hikrobotics.com</b></span>
+    <span class="badge">抓取时间 <b id="b-time">—</b></span>
+    <span class="badge">相机 <b id="b-cam">—</b> 款</span>
+    <span class="badge">镜头 <b id="b-lens">—</b> 款</span>
+    <span class="badge">光源 <b id="b-light">—</b> 款</span>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>1. 检测条件 <span>改动后自动重算</span></h2>
+
+    <div class="grid2">
+      <div class="row"><label>视场宽 FOV-W (mm)</label><input id="fovW" type="number" value="30" step="1"></div>
+      <div class="row"><label>视场高 FOV-H (mm)</label><input id="fovH" type="number" value="25" step="1"></div>
+    </div>
+    <div class="grid2">
+      <div class="row"><label>最小划痕宽度 (mm)</label><input id="defect" type="number" value="0.08" step="0.005"></div>
+      <div class="row"><label>缺陷占几像素</label>
+        <select id="pxPer"><option value="2">2 px（勉强）</option><option value="3" selected>3 px（推荐）</option><option value="4">4 px（高可靠）</option><option value="5">5 px（严苛）</option></select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="row"><label>工作距离下限 (mm)</label><input id="wdMin" type="number" value="150" step="10"></div>
+      <div class="row"><label>工作距离上限 (mm)</label><input id="wdMax" type="number" value="250" step="10"></div>
+    </div>
+    <div class="grid2">
+      <div class="row"><label>产线速度 (mm/s)</label><input id="speed" type="number" value="50" step="10"></div>
+      <div class="row"><label>光照颜色偏好</label>
+        <select id="color"><option value="">不限</option><option value="白光" selected>白光（通用）</option><option value="蓝光">蓝光（金属对比）</option><option value="红光">红光</option><option value="IR">红外</option></select>
+      </div>
+    </div>
+
+    <div class="row"><label>被测材质</label>
+      <select id="material">
+        <option value="金属" selected>金属（拉丝/抛光/喷砂）</option>
+        <option value="玻璃">玻璃 / 透明件</option>
+        <option value="塑料">塑料 / 注塑</option>
+        <option value="涂层">涂层 / 漆面</option>
+        <option value="陶瓷">陶瓷 / 陶瓷基板</option>
+      </select>
+    </div>
+    <div class="row"><label>划痕类型</label>
+      <select id="scratch">
+        <option value="线状划痕" selected>线状划痕（浅、长、方向性强）</option>
+        <option value="微裂纹">微裂纹（细、断续）</option>
+        <option value="凹坑">凹坑 / 压痕</option>
+        <option value="油污">油污 / 指纹（非结构性）</option>
+      </select>
+    </div>
+    <div class="row"><label>表面形状</label>
+      <select id="surface">
+        <option value="平面" selected>平面</option>
+        <option value="圆柱">圆柱 / 回转体</option>
+        <option value="曲面">自由曲面</option>
+      </select>
+    </div>
+    <div class="row"><label>其它</label>
+      <label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--ink);font-size:12px">
+        <input id="wantTele" type="checkbox" checked style="width:auto"> 同时给出远心镜头方案
+      </label>
+    </div>
+
+    <button id="calc">生成选型方案</button>
+    <p class="hint">计算为几何光学估算（薄透镜近似），采购前请用官方规格书与实拍复核。</p>
+  </section>
+
+  <section class="panel" id="results">
+    <h2>2. 选型结果 <span id="res-note"></span></h2>
+    <div id="out" class="cards"><div class="empty">点击「生成选型方案」</div></div>
+  </section>
+</main>
+
+<section class="panel wide">
+  <h2>3. 型号数据表 <span>海康机器人官网在售 · 可搜索</span></h2>
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-k="cameras">工业面阵相机</div>
+    <div class="tab" data-k="lenses">FA 镜头</div>
+    <div class="tab" data-k="tele">远心 / 工业镜头</div>
+    <div class="tab" data-k="lights">光源</div>
+  </div>
+  <input id="q" placeholder="搜索型号或描述，例如 MV-CS050 / 环形 / C-Mount">
+  <div class="scroll" style="margin-top:10px"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+  <p class="src" id="tbl-note"></p>
+</section>
+
+<section class="panel wide">
+  <h2>4. 选型原理与实拍参考</h2>
+  <div class="figs">
+    <div class="fig">
+      <svg viewBox="0 0 320 150" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="320" height="150" fill="#0a1016"/>
+        <g stroke="#2b3a47" stroke-width="1"><line x1="0" y1="120" x2="320" y2="120"/></g>
+        <rect x="40" y="118" width="240" height="16" fill="#1d2b36" stroke="#33475a"/>
+        <text x="44" y="146" fill="#6b7783" font-size="9">工件表面</text>
+        <g><path d="M150 112 l24 6" stroke="#e5534b" stroke-width="2"/><text x="180" y="108" fill="#e5534b" font-size="9">划痕（凹槽）</text></g>
+        <g stroke="#3fb6a8" stroke-width="2">
+          <line x1="90" y1="60" x2="150" y2="112"/><line x1="230" y1="60" x2="170" y2="112"/>
+        </g>
+        <circle cx="160" cy="46" r="12" fill="#18222c" stroke="#3fb6a8"/>
+        <text x="176" y="42" fill="#8b98a5" font-size="9">相机 + 镜头</text>
+        <g stroke="#f0b429" stroke-width="2" fill="none">
+          <path d="M118 66 L150 62"/><path d="M202 66 L170 62"/>
+        </g>
+        <text x="96" y="58" fill="#f0b429" font-size="9">低角度环光</text>
+        <text x="206" y="58" fill="#f0b429" font-size="9">低角度环光</text>
+        <path d="M150 62 L152 110" stroke="#f0b429" stroke-dasharray="3 3"/>
+        <text x="120" y="90" fill="#6b7783" font-size="8">镜面反射不进镜头</text>
+      </svg>
+      <p>暗场照明：光以低角度掠射，划痕把光散射进镜头，平整面保持黑</p>
+    </div>
+    <div class="fig"><img src="docs/img/camera.png" alt="海康工业相机"><p>面阵相机（官方产品图）</p></div>
+    <div class="fig"><img src="docs/img/lens.png" alt="海康 FA 镜头"><p>FA 镜头 MVL 系列（官方产品图）</p></div>
+    <div class="fig"><img src="docs/img/light.png" alt="海康环形光源"><p>环形光源 MV-LRDS 系列（官方产品图）</p></div>
+  </div>
+  <div class="calc" style="margin-top:14px">
+    <b>相机</b>：所需像素 = FOV ÷ (最小缺陷 ÷ 缺陷像素数)，长边短边都要满足。<br>
+    <b>镜头</b>：靶面 = 分辨率 × 像元；焦距 f ≈ WD × 靶面宽 ÷ (FOV 宽 + 靶面宽)；镜头像面必须 ≥ 靶面对角线，且镜头卡口与相机一致。<br>
+    <b>远心镜头</b>：放大倍率 β ≈ 靶面高 ÷ FOV 高；远心镜头倍率固定，适合尺寸测量与深孔/台阶划痕。<br>
+    <b>光源</b>：线状划痕/微裂纹优先低角度暗场环光；镜面抛光件加同轴光；透明件用背光/平行面光；曲面用穹顶光。<br>
+    <b>帧率</b>：fps ≥ 产线速度 ÷ FOV 高（沿运动方向），并校核接口带宽（GigE ≈ 118 MB/s、USB3.0 ≈ 350 MB/s，8bit）。
+  </div>
+</section>
+
+<footer>
+  数据来自海康机器人官网机器视觉产品页（工业相机 / 镜头 / 光源），抓取脚本见 <span class="mono">scripts/fetch_hik.py</span>。工具只做<b>工程估算</b>：视场、景深、畸变、照度均匀性与实际成像需实拍验证；型号与参数以官方最新规格书为准。
+</footer>
+
+<script>/*__DATA__*/</script>
+<script>
+(function(){
+  const D = window.HIK;
+  const $ = s => document.querySelector(s);
+  const fmt = (n,d=2) => Number(n).toFixed(d).replace(/\.?0+$/,'') || '0';
+
+  $('#b-time').textContent = D.meta.fetchedAt;
+  $('#b-cam').textContent = D.meta.counts.cameras;
+  $('#b-lens').textContent = D.meta.counts.lenses + D.meta.counts.tele;
+  $('#b-light').textContent = D.meta.counts.lights;
+
+  // ---------- 相机筛选 ----------
+  const IF_BW = {"GigE":118,"USB3.0":350,"10GigE":1100,"CoaXPress":1200,"CameraLink":680,"其他":100};
+
+  function pickCameras(needW, needH, fpsNeed){
+    const out = [];
+    for (const c of D.cameras){
+      const fit1 = c.w >= needW && c.h >= needH;
+      const fit2 = c.h >= needW && c.w >= needH;   // 允许旋转相机 90°
+      if (!(fit1 || fit2)) continue;
+      const bw = IF_BW[c.if] || 100;
+      const need = c.w * c.h * Math.min(c.fps, Math.max(fpsNeed, 1)) / 1e6; // MB/s (8bit)
+      const bwOk = need <= bw * 0.85;
+      const fpsOk = c.fps >= fpsNeed;
+      const score = (bwOk?0:1e9) + (fpsOk?0:5e8) + c.w*c.h;   // 优先带宽/帧率达标，再取最小分辨率
+      out.push({c, bwOk, fpsOk, need, score, rotated: !fit1});
+    }
+    out.sort((a,b)=>a.score-b.score);
+    return out.slice(0,3);
+  }
+
+  // ---------- FA 镜头 ----------
+  function pickLenses(cam, fovW, fovH, wdMin, wdMax){
+    const sw = cam.w * cam.px / 1000;      // mm
+    const sh = cam.h * cam.px / 1000;
+    const diag = Math.hypot(sw, sh);
+    const beta = (sw/fovW + sh/fovH) / 2;
+    const wd = (wdMin + wdMax) / 2;
+    const fReq = wd * sw / (fovW + sw);
+    const cands = D.lenses
+      .filter(l => l.circle >= diag * 1.0 && /C-?mount/i.test(l.mount))
+      .map(l => {
+        const fov = sw * wd / l.f;                       // 该焦距在 WD 处的视场宽
+        const coverW = fov >= fovW * 0.95 && fov <= fovW * 2.2;
+        const err = Math.abs(l.f - fReq) / fReq;
+        return {l, fov, err, score: (coverW?0:1e6) + err * 1e4};
+      })
+      .filter(x => x.err <= 0.6)
+      .sort((a,b)=>a.score-b.score);
+    return {sw, sh, diag, beta, fReq, list: cands.slice(0,3)};
+  }
+
+  // ---------- 远心 ----------
+  function pickTele(cam, fovW, fovH, wdMin, wdMax){
+    const sw = cam.w * cam.px / 1000, sh = cam.h * cam.px / 1000;
+    const diag = Math.hypot(sw, sh);
+    const betaReq = Math.min(sh / fovH, sw / fovW);
+    const list = D.tele
+      .filter(t => t.circle >= diag && t.mount && /C-?mount/i.test(t.mount))
+      .map(t => {
+        const err = Math.abs(t.mag - betaReq) / betaReq;
+        const wdOk = !t.wd || (t.wd >= wdMin*0.8 && t.wd <= wdMax*1.25);
+        return {t, err, wdOk, score: (wdOk?0:1e5) + err*1e4};
+      })
+      .filter(x => x.err <= 0.25)
+      .sort((a,b)=>a.score-b.score);
+    return {betaReq, list: list.slice(0,2)};
+  }
+
+  // ---------- 光源 ----------
+  const LIGHT_PLAN = {
+    "金属": {"线状划痕":["环形光源","同轴光源"], "微裂纹":["环形光源","同轴光源"], "凹坑":["穹顶光源","环形光源"], "油污":["同轴光源","面光源(背光)"]},
+    "玻璃": {"线状划痕":["面光源(背光)","平行面光源","环形光源"], "微裂纹":["平行面光源","面光源(背光)"], "凹坑":["环形光源","穹顶光源"], "油污":["面光源(背光)","同轴光源"]},
+    "塑料": {"线状划痕":["条形光源","环形光源"], "微裂纹":["条形光源","环形光源"], "凹坑":["穹顶光源","条形光源"], "油污":["同轴光源","条形光源"]},
+    "涂层": {"线状划痕":["环形光源","条形光源"], "微裂纹":["环形光源","条形光源"], "凹坑":["穹顶光源","环形光源"], "油污":["同轴光源","条形光源"]},
+    "陶瓷": {"线状划痕":["同轴光源","环形光源"], "微裂纹":["环形光源","同轴光源"], "凹坑":["穹顶光源","环形光源"], "油污":["同轴光源","条形光源"]}
+  };
+
+  function pickLights(material, scratch, surface, color, fovW, fovH){
+    let types = (LIGHT_PLAN[material] || {})[scratch] || ["环形光源"];
+    if (surface !== "平面") types = ["穹顶光源"].concat(types.filter(t=>t!=="穹顶光源"));
+    const order = Object.fromEntries(types.map((t,i)=>[t,i]));
+    const cands = D.lights.map(l => {
+      const tIdx = order[l.t] ?? 99;
+      const colorOk = !color || l.color === color;
+      const powerScore = -l.p;
+      return {l, score: tIdx*1e4 + (colorOk?0:5e3) + powerScore/100 + (l.t==="环形光源"?0:0)};
+    }).filter(x => x.score < 3e4).sort((a,b)=>a.score-b.score);
+    return {types, list: cands.slice(0,4)};
+  }
+
+  function kv(obj){
+    return '<div class="kv">' + Object.entries(obj).map(([k,v])=>`<div>${k}<br><b>${v}</b></div>`).join('') + '</div>';
+  }
+
+  function run(){
+    const fovW = +$('#fovW').value, fovH = +$('#fovH').value;
+    const defect = +$('#defect').value, pxPer = +$('#pxPer').value;
+    const wdMin = +$('#wdMin').value, wdMax = +$('#wdMax').value;
+    const speed = +$('#speed').value, color = $('#color').value;
+    const material = $('#material').value, scratch = $('#scratch').value, surface = $('#surface').value;
+    const wantTele = $('#wantTele').checked;
+
+    const acc = defect / pxPer;                 // mm/px
+    const needW = Math.ceil(fovW / acc), needH = Math.ceil(fovH / acc);
+    const fpsNeed = Math.max(speed / fovH, 1);  // 沿 FOV 高方向运动
+
+    const cams = pickCameras(needW, needH, fpsNeed);
+    if (!cams.length) { $('#out').innerHTML = '<div class="empty">没有满足该精度的型号，请放宽缺陷像素数或缩小视场。</div>'; return; }
+    const cam = cams[0].c;
+    const L = pickLenses(cam, fovW, fovH, wdMin, wdMax);
+    const T = wantTele ? pickTele(cam, fovW, fovH, wdMin, wdMax) : {list:[]};
+    const LG = pickLights(material, scratch, surface, color, fovW, fovH);
+
+    const realAcc = fovW / cam.w;
+    const defectPx = defect / realAcc;
+    const camBw = cams[0].need;
+    const sensorW = cam.w * cam.px / 1000, sensorH = cam.h * cam.px / 1000;
+
+    let html = '';
+    html += `<div class="calc">需要精度 <b>${fmt(acc,4)} mm/px</b> → 需要像素 ≥ <b>${needW} × ${needH}</b>；
+      帧率需求 ≥ <b>${fmt(fpsNeed,2)} fps</b>（速度 ${speed} mm/s ÷ FOV 高 ${fovH} mm）；
+      推荐相机实际精度 <b>${fmt(realAcc,4)} mm/px</b>，${fmt(defect,3)} mm 划痕约占 <b>${fmt(defectPx,1)} px</b>。</div>`;
+
+    html += `<div class="card pick"><h3>相机 <span class="tag">首选 · 共 ${cams.length} 个候选</span></h3>
+      <div class="model">${cam.m}</div>
+      <div class="src">${cam.d || ''}</div>
+      ${kv({"分辨率":cam.w+" × "+cam.h,"像元":fmt(cam.px,2)+" μm","靶面":cam.inch+"（"+fmt(sensorW,2)+" × "+fmt(sensorH,2)+" mm）","最大帧率":fmt(cam.fps,1)+" fps","接口":cam.if,"镜头接口":cam.mount,"曝光":cam.exp||"—"})}
+      <div class="src" style="margin-top:6px">带宽占用 ${fmt(camBw,1)} MB/s（8bit）${cams[0].bwOk?'<span class="ok"> ✓ 在接口能力内</span>':'<span class="bad"> ✗ 超接口能力，需降帧/ROI</span>'}${cams[0].rotated?' · 需相机旋转 90° 安装':''}</div>
+      </div>`;
+
+    if (cams[1]) html += `<div class="card"><h3>备选相机</h3>
+      <div class="model">${cams[1].c.m} <span class="tag">${cams[1].c.w}×${cams[1].c.h}</span></div>
+      <div class="src">${cams[1].c.mp} MP · ${fmt(cams[1].c.px,2)} μm · ${cams[1].c.if} · ${fmt(cams[1].c.fps,1)} fps</div></div>`;
+
+    html += `<div class="card pick"><h3>FA 镜头 <span class="tag">按焦距匹配</span></h3>`;
+    if (L.list.length){
+      const best = L.list[0];
+      html += `<div class="model">${best.l.m}</div>
+        <div class="src">${best.l.d || ''}</div>
+        ${kv({"焦距":fmt(best.l.f,1)+" mm","光圈":best.l.fn,"像面":"Φ"+fmt(best.l.circle,1)+" mm","卡口":best.l.mount,"需要焦距":fmt(L.fReq,1)+" mm","靶面":"Φ"+fmt(L.diag,2)+" mm"})}
+        <div class="src" style="margin-top:6px">该镜头在 WD ${fmt((wdMin+wdMax)/2,0)} mm 处视场约 ${fmt(best.fov,0)} mm（目标 ${fovW} mm）；放大倍率 β ≈ ${fmt(L.beta,3)}。</div>`;
+      if (L.list[1]) html += `<div class="src" style="margin-top:4px">备选：${L.list[1].l.m}（${fmt(L.list[1].l.f,0)}mm，视场 ${fmt(L.list[1].fov,0)}mm）</div>`;
+      if (L.list[2]) html += `<div class="src">备选：${L.list[2].l.m}（${fmt(L.list[2].l.f,0)}mm，视场 ${fmt(L.list[2].fov,0)}mm）</div>`;
+    } else {
+      html += `<div class="src bad">无匹配 FA 镜头：请调整工作距离（当前 ${wdMin}–${wdMax} mm）或改用远心方案。</div>`;
+    }
+    html += `</div>`;
+
+    if (wantTele){
+      html += `<div class="card"><h3>远心镜头 <span class="tag">倍率 β ≈ ${fmt(T.betaReq,3)}</span></h3>`;
+      if (T.list.length){
+        html += T.list.map(x=>`<div style="margin-bottom:8px"><div class="model">${x.t.m}</div>
+          <div class="src">${x.t.d}</div>
+          ${kv({"放大倍率":fmt(x.t.mag,3),"工作距离":x.t.wdTxt||"—","像面":"Φ"+fmt(x.t.circle,1)+" mm","卡口":x.t.mount})}</div>`).join('');
+      } else {
+        html += `<div class="src bad">工作距离 ${wdMin}–${wdMax} mm、倍率 ${fmt(T.betaReq,3)} 附近无匹配远心镜头；远心镜头工作距离通常固定（110/150/200/290/410 mm 等），需按实际距离选型。</div>`;
+      }
+      html += `</div>`;
+    }
+
+    html += `<div class="card pick"><h3>光源 <span class="tag">${LG.types.join(' / ')}</span></h3>`;
+    if (LG.list.length){
+      html += LG.list.map((x,i)=>`<div style="margin-bottom:8px">
+        <div class="model">${i===0?'★ ':''}${x.l.m} <span class="tag">${x.l.t}</span></div>
+        <div class="src">${x.l.d}</div>
+        ${kv({"颜色":x.l.color,"功率":x.l.pTx,"控制器接口":x.l.if})}</div>`).join('');
+      html += `<div class="src">配光要点：${material} · ${scratch} · ${surface}${color?(' · '+color):''} → 优先 ${LG.types[0]}。环光外径建议 ≥ FOV 短边（${Math.min(fovW,fovH)} mm），实际以打光试验为准。</div>`;
+    } else {
+      html += `<div class="src bad">该组合下没有匹配颜色/类型的光源，请放宽颜色偏好。</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="card"><h3>BOM 与校核</h3>
+      <table><thead><tr><th>品类</th><th>型号</th><th>关键参数</th></tr></thead><tbody>
+      <tr><td>相机</td><td class="mono">${cam.m}</td><td>${cam.w}×${cam.h} · ${fmt(cam.px,2)}μm · ${cam.if}</td></tr>
+      ${L.list.length?`<tr><td>镜头</td><td class="mono">${L.list[0].l.m}</td><td>${fmt(L.list[0].l.f,1)}mm ${L.list[0].l.fn} · Φ${fmt(L.list[0].l.circle,1)}mm</td></tr>`:''}
+      ${T.list&&T.list.length?`<tr><td>远心(备选)</td><td class="mono">${T.list[0].t.m}</td><td>${fmt(T.list[0].t.mag,3)}× · ${T.list[0].t.wdTxt||''}</td></tr>`:''}
+      ${LG.list.length?`<tr><td>光源</td><td class="mono">${LG.list[0].l.m}</td><td>${LG.list[0].l.t} · ${LG.list[0].l.color} · ${LG.list[0].l.pTx}</td></tr>`:''}
+      </tbody></table>
+      <ul class="tight">
+        <li>精度余量：${defectPx>=3?'<span class="ok">达标（≥3 px）</span>':'<span class="bad">不足 3 px，划痕可能漏检</span>'}</li>
+        <li>镜头像面 Φ${fmt(L.list.length?L.list[0].l.circle:0,1)} mm vs 靶面对角 Φ${fmt(L.diag,2)} mm：${(L.list.length&&L.list[0].l.circle>=L.diag)?'<span class="ok">覆盖</span>':'<span class="bad">不覆盖</span>'}</li>
+        <li>帧率：${fmt(cam.fps,1)} fps vs 需求 ${fmt(fpsNeed,2)} fps：${cam.fps>=fpsNeed?'<span class="ok">满足</span>':'<span class="bad">不足</span>'}</li>
+        <li>以上为几何估算；景深、畸变、照度均匀性需实拍确认。</li>
+      </ul>
+    </div>`;
+
+    $('#out').innerHTML = html;
+    $('#res-note').textContent = `${needW}×${needH} px 起`;
+  }
+
+  document.querySelectorAll('input,select').forEach(el=>{
+    el.addEventListener('change', run);
+    el.addEventListener('input', ()=>{ if(el.type==='number') clearTimeout(el._t), el._t=setTimeout(run,350); });
+  });
+  $('#calc').addEventListener('click', run);
+
+  // ---------- 数据表 ----------
+  const COLS = {
+    cameras: [["型号","m"],["分辨率","res"],["像元(μm)","px"],["靶面","inch"],["帧率(fps)","fps"],["接口","if"],["卡口","mount"]],
+    lenses:  [["型号","m"],["焦距","f"],["F数","fn"],["像面","circle"],["卡口","mount"]],
+    tele:    [["型号","m"],["倍率","mag"],["工作距离","wdTxt"],["像面","circle"],["卡口","mount"]],
+    lights:  [["型号","m"],["类型","t"],["颜色","color"],["功率","pTx"],["接口","if"]]
+  };
+  let tab = 'cameras';
+  function renderTable(){
+    const q = $('#q').value.trim().toLowerCase();
+    const cols = COLS[tab];
+    const rows = D[tab].filter(r => !q || Object.values(r).some(v=>String(v).toLowerCase().includes(q))).slice(0,400);
+    $('#tbl thead').innerHTML = '<tr>'+cols.map(c=>`<th>${c[0]}</th>`).join('')+'</tr>';
+    $('#tbl tbody').innerHTML = rows.map(r=>'<tr>'+cols.map(c=>{
+      let v = r[c[1]];
+      if (c[1]==='res') v = r.w+' × '+r.h;
+      if (c[1]==='px') v = fmt(r.px,2);
+      if (c[1]==='f'||c[1]==='circle'||c[1]==='mag') v = fmt(v,3);
+      if (c[1]==='fps') v = fmt(v,1);
+      return `<td class="${['m'].includes(c[1])?'mono':''}">${v===undefined||v===''?'—':v}</td>`;
+    }).join('')+'</tr>').join('');
+    $('#tbl-note').textContent = `显示 ${rows.length} / ${D[tab].length} 条；数据抓取于 ${D.meta.fetchedAt}，来自 hikrobotics.com 产品页。`;
+  }
+  $('#tabs').addEventListener('click', e=>{
+    const t = e.target.closest('.tab'); if(!t) return;
+    tab = t.dataset.k;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
+    renderTable();
+  });
+  $('#q').addEventListener('input', renderTable);
+
+  renderTable();
+  run();
+})();
+</script>
+</body>
+</html>
