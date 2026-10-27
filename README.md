@@ -103,7 +103,11 @@ python scripts/build_site.py           # 重新生成 index.html
 | | |
 |---|---|
 | ![相机](docs/img/camera.png) 面阵相机（MV-CS050 系列） | ![镜头](docs/img/lens.png) FA 镜头（MVL-HF 系列） |
-| ![光源](docs/img/light.png) 环形光源（MV-LRDS 系列） | 暗场照明原理见工具内「选型原理」板块 |
+| ![光源](docs/img/light.png) 环形光源（MV-LRDS 系列） | 暗场照明原理见下方 |
+
+![选型原理与产品参考](docs/img/principle.png)
+
+暗场照明：低角度光掠射工件表面，平整面把光反射出镜头（成像为黑），划痕因散射把光送进镜头（成像为亮），因此**浅划痕的对比度取决于入射角而不是亮度**。
 
 ---
 
