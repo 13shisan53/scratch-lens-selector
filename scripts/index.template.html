@@ -213,7 +213,11 @@
 (function(){
   const D = window.HIK;
   const $ = s => document.querySelector(s);
-  const fmt = (n,d=2) => Number(n).toFixed(d).replace(/\.?0+$/,'') || '0';
+  const fmt = (n,d=2) => {
+    if (!isFinite(n)) return '—';
+    const s = Number(n).toFixed(d);
+    return d > 0 ? s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '') : s;
+  };
 
   $('#b-time').textContent = D.meta.fetchedAt;
   $('#b-cam').textContent = D.meta.counts.cameras;
@@ -233,7 +237,8 @@
       const need = c.w * c.h * Math.min(c.fps, Math.max(fpsNeed, 1)) / 1e6; // MB/s (8bit)
       const bwOk = need <= bw * 0.85;
       const fpsOk = c.fps >= fpsNeed;
-      const score = (bwOk?0:1e9) + (fpsOk?0:5e8) + c.w*c.h;   // 优先带宽/帧率达标，再取最小分辨率
+      // 优先：接口带宽达标 > 海康自有 MV 系列 > 帧率达标 > 像素最少
+      const score = (bwOk?0:1e10) + (/^MV-/.test(c.m)?0:1e8) + (fpsOk?0:1e7) + c.w*c.h;
       out.push({c, bwOk, fpsOk, need, score, rotated: !fit1});
     }
     out.sort((a,b)=>a.score-b.score);
@@ -291,13 +296,25 @@
     let types = (LIGHT_PLAN[material] || {})[scratch] || ["环形光源"];
     if (surface !== "平面") types = ["穹顶光源"].concat(types.filter(t=>t!=="穹顶光源"));
     const order = Object.fromEntries(types.map((t,i)=>[t,i]));
+    const short = Math.min(fovW, fovH);
+    const ideal = short * 1.5;                 // 经验：发光面 ≈ 1.2~2× 视场短边
     const cands = D.lights.map(l => {
       const tIdx = order[l.t] ?? 99;
       const colorOk = !color || l.color === color;
-      const powerScore = -l.p;
-      return {l, score: tIdx*1e4 + (colorOk?0:5e3) + powerScore/100 + (l.t==="环形光源"?0:0)};
+      const tooBig = l.size > 0 && l.size > short * 4;
+      const sizePen = l.size > 0 ? Math.min(2.5, Math.abs(l.size - ideal) / Math.max(short,1)) : 0.8;
+      const power = Math.min(1.2, l.p / 40);   // 大视场偏大功率，避免小件过曝
+      return {l, score: tIdx*1e4 + (colorOk?0:6e3) + (tooBig?1e4:0) + sizePen*900 + power*120};
     }).filter(x => x.score < 3e4).sort((a,b)=>a.score-b.score);
-    return {types, list: cands.slice(0,4)};
+    // 同一类型最多取 2 个，保证方案有备选类型
+    const used = {}, list = [];
+    for (const x of cands){
+      used[x.l.t] = (used[x.l.t]||0);
+      if (used[x.l.t] >= 2) continue;
+      used[x.l.t]++; list.push(x);
+      if (list.length >= 4) break;
+    }
+    return {types, list};
   }
 
   function kv(obj){
@@ -375,7 +392,9 @@
       html += LG.list.map((x,i)=>`<div style="margin-bottom:8px">
         <div class="model">${i===0?'★ ':''}${x.l.m} <span class="tag">${x.l.t}</span></div>
         <div class="src">${x.l.d}</div>
-        ${kv({"颜色":x.l.color,"功率":x.l.pTx,"控制器接口":x.l.if})}</div>`).join('');
+        ${kv(Object.assign({"颜色":x.l.color,"功率":x.l.pTx,"控制器接口":x.l.if},
+          x.l.size?{"外形尺寸":fmt(x.l.size,0)+" mm"}:{},
+          x.l.angle?{"官方标注角度":x.l.angle+"°"}:{}))}</div>`).join('');
       html += `<div class="src">配光要点：${material} · ${scratch} · ${surface}${color?(' · '+color):''} → 优先 ${LG.types[0]}。环光外径建议 ≥ FOV 短边（${Math.min(fovW,fovH)} mm），实际以打光试验为准。</div>`;
     } else {
       html += `<div class="src bad">该组合下没有匹配颜色/类型的光源，请放宽颜色偏好。</div>`;

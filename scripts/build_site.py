@@ -40,8 +40,19 @@ def norm_iface(s):
 
 def sensor_inch(s):
     """'1/2.9”' -> '1/2.9\"'；统一引号，去掉空格。"""
-    t = (s or "").strip().replace("”", '"').replace("''", '"').replace("’", '"')
+    t = (s or "").strip().replace("’’", '"').replace("”", '"').replace("''", '"').replace("’", '"')
     return t
+
+
+def light_size(model):
+    """从型号里解析环光外径 / 条形长度（mm）：MV-LRDS-H-230-60-W2 -> 230"""
+    m = re.match(r"MV-L[A-Z]{3}(?:-H)?-(\d+(?:\.\d+)?)", model or "")
+    return float(m.group(1)) if m else 0.0
+
+
+def light_angle(desc):
+    m = re.search(r"(\d+)\s*°", desc or "")
+    return int(m.group(1)) if m else 0
 
 
 def circle_mm(s):
@@ -145,6 +156,7 @@ def build():
                 "color": light_color(r["model"], r["desc"]),
                 "if": s.get("接口类型") or "", "p": rnum(s.get("功率")),
                 "pTx": s.get("功率") or "", "d": r["desc"],
+                "size": light_size(r["model"]), "angle": light_angle(r["desc"]),
             })
     lights.sort(key=lambda x: (x["t"], x["m"]))
 
