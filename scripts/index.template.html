@@ -259,7 +259,8 @@
         const fov = sw * wd / l.f;                       // 该焦距在 WD 处的视场宽
         const coverW = fov >= fovW * 0.95 && fov <= fovW * 2.2;
         const err = Math.abs(l.f - fReq) / fReq;
-        return {l, fov, err, score: (coverW?0:1e6) + err * 1e4};
+        const over = Math.max(0, l.circle / diag - 1);   // 像面过度富余 = 更大更贵，轻惩罚
+        return {l, fov, err, score: (coverW?0:1e6) + err * 1e4 + over * 200};
       })
       .filter(x => x.err <= 0.6)
       .sort((a,b)=>a.score-b.score);
